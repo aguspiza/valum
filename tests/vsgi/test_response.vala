@@ -4,18 +4,11 @@
 public class TestResponse : VSGI.Response {
 
 	private uint _status;
-	private Soup.MessageHeaders _headers;
 
 	public override uint status { get { return this._status; } set { this._status = value; } }
 
-	public override Soup.MessageHeaders headers {
-		get {
-			return this._headers;
-		}
-	}
-
 	public TestResponse (TestRequest req, uint status) {
-		base (req);
+		Object (request: req);
 		this._status = status;
 	}
 

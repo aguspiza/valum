@@ -10,7 +10,7 @@ namespace VSGI {
 		/**
 		 * @since 0.1
 		 */
-		protected Request request;
+		public Request request { construct; get; }
 
 		/**
 		 * Response status.
@@ -24,25 +24,14 @@ namespace VSGI {
 		 *
 		 * @since 0.0.1
 		 */
-		public abstract Soup.MessageHeaders headers { get; }
-
-		/**
-		 * Create a new Response instance.
-		 *
-		 * @since 0.1
-		 *
-		 * @param request Request that originated this response
-		 */
-		public Response (Request request) {
-			this.request = request;
-		}
+		public Soup.MessageHeaders headers { construct; get; }
 
 		/**
 		 * Property for the Set-Cookie header.
 		 *
 		 * @since 0.1
 		 */
-		public SList<Soup.Cookie> cookies {
+		public virtual SList<Soup.Cookie> cookies {
 			set {
 				this.headers.remove ("Set-Cookie");
 
@@ -50,6 +39,70 @@ namespace VSGI {
 					this.headers.append ("Set-Cookie", cookie.to_set_cookie_header ());
 				}
 			}
+		}
+
+		/**
+		 * Tells if the status line has been written.
+		 *
+		 * Once set to true, call to {@link write_status_line} must fail.
+		 *
+		 * @since 0.1
+		 */
+		protected bool status_line_written = false;
+
+		/**
+		 * Write the status line in the {@link Response}.
+		 *
+		 * @since 0.1
+		 */
+		public virtual signal ssize_t write_status_line (Cancellable? cancellable) {
+			if (status_line_written)
+				error ("status line already written");
+
+			this.status_line_written = true;
+
+			var written = this.write ("%u %s".printf (this.status, Soup.Status.get_phrase (this.status)).data);
+
+			return written;
+		}
+
+		/**
+		 * Tells if the response headers have been written.
+		 *
+		 * Once set to true, call to {@link write_headers} must fail.
+		 *
+		 * @since 0.1
+		 */
+		protected bool headers_written = false;
+
+		/**
+		 * Write the headers and a new line in the {@link Response}.
+		 *
+		 * This must be called in order to perform any {@link write} operations,
+		 * otherwise the response will be corrupted.
+		 *
+		 * @since 0.1
+		 */
+		public virtual signal ssize_t write_headers (Cancellable? cancellable = null) {
+			if (this.headers_written)
+				error ("headers already written");
+
+			this.headers_written = true;
+
+			ssize_t written = 0;
+
+			if (!this.status_line_written)
+				written += write_status_line (cancellable);
+
+			// headers
+			this.headers.foreach ((k, v) => {
+				written += this.write ("%s: %s\r\n".printf(k, v).data, cancellable);
+			});
+
+			// newline preceeding the body
+			written += this.write ("\r\n".data, cancellable);
+
+			return written;
 		}
 	}
 }

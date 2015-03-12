@@ -1,11 +1,9 @@
 namespace VSGI {
 
 	/**
-	 * Server that handles a single Application.
+	 * Server serving a single {@link Application}.
 	 *
-	 * It is the server responsibility to close {@link Request} and
-	 * {@link Response} providen to the served {@link Application} if it has not
-	 * been done in the {@link Application.handler}.
+	 * Provides abstraction over concrete server and protocol implementations.
 	 *
 	 * @since 0.1
 	 */

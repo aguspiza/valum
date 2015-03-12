@@ -15,7 +15,6 @@ namespace VSGI {
 		private string _method = Request.GET;
 		private Soup.URI _uri;
 		private HashTable<string, string>? _query = null;
-		private Soup.MessageHeaders _headers = new Soup.MessageHeaders (Soup.MessageHeadersType.REQUEST);
 
 		public override Soup.URI uri { get { return this._uri; } }
 
@@ -25,15 +24,30 @@ namespace VSGI {
 			}
 		}
 
+		public override Soup.HTTPVersion http_version {
+			get {
+				if (request.environment["HTTP_VERSION"] == null) {
+					warning ("could not infer the HTTP protocol, fallback to HTTP/1.1");
+					return Soup.HTTPVersion.@1_1;
+				}
+
+				switch (request.environment["HTTP_VERSION"]) {
+					case "HTTP/1.0":
+						return Soup.HTTPVersion.@1_0;
+					default:
+					case "HTTP/1.1":
+						return Soup.HTTPVersion.@1_1;
+				}
+			}
+		}
+
 		public override string method {
 			owned get { return this._method; }
 		}
 
-		public override Soup.MessageHeaders headers {
-			get { return this._headers; }
-		}
-
 		public FastCGIRequest(FastCGI.request request) {
+			Object (headers: new Soup.MessageHeaders (Soup.MessageHeadersType.RESPONSE));
+
 			this.request = request;
 
 			var environment = this.request.environment;
@@ -64,17 +78,13 @@ namespace VSGI {
 			if (environment["QUERY_STRING"] != null)
 				this._query = Soup.Form.decode ((string) environment["QUERY_STRING"]);
 
-			var headers = new StringBuilder();
-
 			foreach (var variable in this.request.environment.get_all ()) {
 				// headers are prefixed with HTTP_
 				if (variable.has_prefix ("HTTP_")) {
 					var parts = variable.split("=", 2);
-					headers.append ("%s: %s\r\n".printf(parts[0].substring(5).replace("_", "-").casefold(), parts[1]));
+					headers.append (parts[0].substring(5).replace("_", "-").casefold(), parts[1]);
 				}
 			}
-
-			Soup.headers_parse (headers.str, (int) headers.len, this._headers);
 		}
 
 		public override ssize_t read (uint8[] buffer, Cancellable? cancellable = null) throws IOError {
@@ -100,71 +110,49 @@ namespace VSGI {
 	 */
 	class FastCGIResponse : Response {
 
-		private new weak FastCGI.request request;
+		private new weak FastCGI.request fastcgi_request;
 
 		/**
-		 * Tells if the headers part of the HTTP message has been written to the
-		 * output stream.
+		 * {@inheritDoc}
+		 *
+		 * The status is stored in the response 'Status' headers according to CGI
+		 * specifications.
 		 */
-		private bool headers_written = false;
-
-		private uint _status;
-
-		private Soup.MessageHeaders _headers = new Soup.MessageHeaders (Soup.MessageHeadersType.RESPONSE);
-
 		public override uint status {
-			get { return this._status; }
-			set { this._status = value; }
+			get {
+				Soup.HTTPVersion ver;
+				uint status_code;
+				string reason_phrase;
+				Soup.headers_parse_status_line ("HTTP/1.1 %".printf(headers.get_one ("Status")), out ver, out status_code, out reason_phrase);
+				return status_code;
+			}
+			set {
+				headers.replace ("Status", "%u %s".printf (value, Soup.Status.get_phrase (value)));
+			}
 		}
-
-		public override Soup.MessageHeaders headers { get { return this._headers; } }
 
 		public FastCGIResponse(FastCGIRequest req, FastCGI.request request) {
-			base (req);
-			this.request = request;
+			Object (request: req, headers: new Soup.MessageHeaders (Soup.MessageHeadersType.REQUEST));
+			this.fastcgi_request = request;
 		}
 
-		private ssize_t write_headers () throws IOError {
-			// headers cannot be rewritten
-			if (this.headers_written)
-				error ("headers have already been written");
-
-			var headers = new StringBuilder ();
-
-			// status
-			headers.append ("Status: %u %s\r\n".printf (this.status, Soup.Status.get_phrase (this.status)));
-
-			// headers
-			this.headers.foreach ((k, v) => {
-				headers.append ("%s: %s\r\n".printf(k, v));
-			});
-
-			// newline preceeding the body
-			headers.append ("\r\n");
-
-			// write headers in a single operation
-			var written = this.request.out.puts (headers.str);
-
-			if (written == GLib.FileStream.EOF)
-				return written;
-
-			// headers are written if the write operation is successful (rewritten otherwise)
-			this.headers_written = true;
-
-			return written;
+		/**
+		 * Status line is included in the {@link headers}.
+		 */
+		public override ssize_t write_status_line (Cancellable? cancellable = null) {
+			return 0;
 		}
 
-		public override ssize_t write (uint8[] buffer, Cancellable? cancellable = null) throws IOError {
-			// lock so that two threads would not write headers at the same time.
-			lock (this.headers_written) {
-				if (!this.headers_written)
-					this.write_headers ();
-			}
+		public override ssize_t write (uint8[] buffer, Cancellable? cancellable = null) {
+			ssize_t written = 0;
 
-			var written = this.request.out.put_str (buffer);
+			if (!this.headers_written)
+				written += this.write_headers (cancellable);
+
+			written += this.fastcgi_request.out.put_str (buffer);
 
 			if (written == GLib.FileStream.EOF)
-				throw new IOError.FAILED ("code %u: could not write body to stream".printf (this.request.out.get_error ()));
+				throw new IOError.FAILED ("code %u: could not write body to stream".printf (this.fastcgi_request.out.get_error ()));
 
 			return written;
 		}
@@ -173,17 +161,11 @@ namespace VSGI {
 		 * Headers are written on the first flush call.
 		 */
 		public override bool flush (Cancellable? cancellable = null) {
-			return this.request.out.flush ();
+			return this.fastcgi_request.out.flush ();
 		}
 
 		public override bool close (Cancellable? cancellable = null) throws IOError {
-			// lock so that two threads would not write headers at the same time.
-			lock (this.headers_written) {
-				if (!this.headers_written)
-					this.write_headers ();
-			}
-
-			return this.request.out.is_closed;
+			return this.fastcgi_request.out.is_closed;
 		}
 	}
 

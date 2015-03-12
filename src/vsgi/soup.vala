@@ -13,19 +13,20 @@ namespace VSGI {
 		private Soup.Message message;
 		private HashTable<string, string>? _query;
 
+		public override HTTPVersion http_version {
+			get {
+				return this.message.http_version;
+			}
+		}
+
 		public override string method { owned get { return this.message.method ; } }
 
 		public override URI uri { get { return this.message.uri; } }
 
 		public override HashTable<string, string>? query { get { return this._query; } }
 
-		public override MessageHeaders headers {
-			get {
-				return this.message.request_headers;
-			}
-		}
-
 		public SoupRequest(Soup.Message msg, HashTable<string, string>? query) {
+			Object (headers: msg.request_headers);
 			this.message = msg;
 			this._query = query;
 		}
@@ -71,18 +72,28 @@ namespace VSGI {
 			set { this.message.set_status (value); }
 		}
 
-		public override MessageHeaders headers {
-			get { return this.message.response_headers; }
-		}
-
 		public SoupResponse (SoupRequest req, Soup.Message msg) {
-			base (req);
+			Object (request: req, headers: msg.response_headers);
 			this.message = msg;
 		}
 
 		public override ssize_t write (uint8[] buffer, Cancellable? cancellable = null) {
 			this.message.response_body.append_take (buffer);
 			return buffer.length;
+		}
+
+		/**
+		 * Status line is automatically written by the inner {@link Soup.Message}.
+		 */
+		public override ssize_t write_status_line (Cancellable? cancellable = null) {
+			return 0;
+		}
+
+		/**
+		 * Headers are automatically written by the inner {@link Soup.Message}.
+		 */
+		public override ssize_t write_headers (Cancellable? cancellable = null) {
+			return 0;
 		}
 
 		/**

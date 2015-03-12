@@ -5,20 +5,19 @@ public class TestRequest : VSGI.Request {
 
 	private string _method;
 	private Soup.URI _uri;
-	private Soup.MessageHeaders _headers;
 	private HashTable<string, string> _query;
+
+	public override Soup.HTTPVersion http_version {
+		get {
+			return Soup.HTTPVersion.@1_1;
+		}
+	}
 
 	public override string method { owned get { return this._method; } }
 
 	public override Soup.URI uri { get { return this._uri; } }
 
 	public override HashTable<string, string>? query { get { return this._query; } }
-
-	public override Soup.MessageHeaders headers {
-		get {
-			return this._headers;
-		}
-	}
 
 	public TestRequest (string method, Soup.URI uri, HashTable<string, string>? query = null) {
 		this._method = method;

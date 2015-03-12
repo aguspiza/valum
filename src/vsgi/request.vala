@@ -50,6 +50,15 @@ namespace VSGI {
 		public HashTable<string, string?>? @params = null;
 
 		/**
+		 * HTTP protocol version.
+		 *
+		 * Consult {@link uri} if you want to access the scheme (http:// or https://).
+		 *
+		 * @since 0.1
+		 */
+		public abstract Soup.HTTPVersion http_version { get; }
+
+		/**
 		 * Request HTTP method
 		 *
 		 * Should be one of OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
@@ -91,7 +100,7 @@ namespace VSGI {
 		 *
 		 * @since 0.0.1
 		 */
-		public abstract Soup.MessageHeaders headers { get; }
+		public Soup.MessageHeaders headers { construct; get; }
 
 		/**
 		 * Request cookies.
@@ -101,7 +110,7 @@ namespace VSGI {
 		 *
 		 * @since 0.1
 		 */
-		public SList<Soup.Cookie> cookies {
+		public virtual SList<Soup.Cookie> cookies {
 			owned get {
 				var cookies = new SList<Soup.Cookie> ();
 				var cookie_list = this.headers.get_list ("Cookie");
