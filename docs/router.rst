@@ -36,10 +36,10 @@ the ``application/x-www-form-urlencoded`` body of the :doc:`vsgi/request`.
 .. code:: vala
 
     app.post ("login", (req, res) => {
-        var buffer = new MemoryOutputStream (null, realloc, free);
+        var buffer = new MemoryOutputStream.resizable ();
 
         // consume the request body
-        buffer.splice (req, OutputStreamSpliceFlags.CLOSE_SOURCE);
+        buffer.splice (req.body, OutputStreamSpliceFlags.CLOSE_SOURCE);
 
         var data = Soup.Form.decode ((string) buffer.get_data ());
 
@@ -48,6 +48,8 @@ the ``application/x-www-form-urlencoded`` body of the :doc:`vsgi/request`.
 
         // assuming you have a session implementation in your app
         var session = new Session.authenticated_by (username, password);
+
+        res.end ();
     });
 
 It is also possible to use a custom HTTP method via the ``method``

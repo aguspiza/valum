@@ -70,7 +70,7 @@ CLI arguments, so you must write your code in a ``main`` function.
         var app = new Router;
 
         app.get ("", (req, res) => {
-            res.write ("Hello world!".data);
+            res.body.write ("Hello world!".data);
         });
 
         return new Server (app).run (args);

@@ -31,6 +31,9 @@ The following table describe how the router deal with specific error messages.
 | ClientError.METHOD_NOT_ALLOWED | Accept   |
 +--------------------------------+----------+
 
+Also, the :doc:`vsgi/response` will be automatically ended, so you do not have
+to trickily end it yourself.
+
 Redirection (3xx)
 -----------------
 
@@ -47,6 +50,8 @@ Redirections are enumerated in ``Redirection`` enumeration.
 
         if (user.save ())
             throw new Redirection.MOVED_TEMPORAIRLY ("/user/%u".printf (user.id));
+
+        res.end ();
     });
 
 Client (4xx) and server (5xx) error

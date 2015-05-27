@@ -46,7 +46,7 @@ a :doc:`route` instance.
 .. code:: vala
 
     app.get ("", (req, res, next) => {
-        res.write ("Hello world!".data);
+        res.body.write ("Hello world!".data);
     });
 
 Every route declaration has a callback associated that does the request

@@ -42,7 +42,9 @@ maintained in nemequ/vala-extra-vapis GitHub repository.
         Memcached.ReturnCode error;
         var value = memcached.get ("hello", out flags, out error);
 
-        res.write (value);
+        res.body.write (value);
+
+        res.end ();
     });
 
     app.post ("<key>", (req, res) => {
@@ -57,4 +59,6 @@ maintained in nemequ/vala-extra-vapis GitHub repository.
         var value = memcached.get ("hello", out flags, out error);
 
         res.write (value);
+
+        res.end ();
     });
