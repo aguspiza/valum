@@ -28,7 +28,7 @@ parameters with their named captures.
 
 .. code:: vala
 
-    app.get ("<int:i>", (req, res) => {
+    app.get ("<int:i>", (req, res, end) => {
         var i = req.params["i"];
     });
 
@@ -43,12 +43,12 @@ Rules are used by the HTTP methods alias and ``method`` function in
 .. code:: vala
 
     // using an alias
-    app.get ("your-rule/<int:id>", (req, res) => {
+    app.get ("your-rule/<int:id>", (req, res, end) => {
 
     });
 
     // using a method
-    app.method (Request.GET, "your-rule/<int:id>", (req, res) => {
+    app.method (Request.GET, "your-rule/<int:id>", (req, res, end) => {
 
     });
 
@@ -112,7 +112,7 @@ shows an example for creating a 404 error page.
 
 .. code:: vala
 
-    app.get("<any:path>", (req, res) => {
+    app.get("<any:path>", (req, res, end) => {
         res.status = 404;
     });
 
@@ -144,10 +144,10 @@ and optimized.
 
 .. code:: vala
 
-    app.regex (Request.GET, /home\/?/, (req, res) => {
+    app.regex (Request.GET, /home\/?/, (req, res, end) => {
         var writer = new DataOutputStream (res.body);
         writer.put_string ("Matched using a regular expression.");
-        res.end ();
+        end ();
     });
 
 Matching using a callback
@@ -163,10 +163,10 @@ A matcher consist of a callback matching a given ``Request`` object.
 
     Route.MatcherCallback matcher = (req) => { req.path == "/custom-matcher"; };
 
-    app.matcher ("GET", matcher, (req, res) => {
+    app.matcher ("GET", matcher, (req, res, end) => {
         var writer = new DataOutputStream (res.body);
         writer.put_string ("Matched using a custom matcher.");
-        res.end ();
+        end ();
     });
 
 You could, for instance, match the request if the user is an administrator and
@@ -177,13 +177,13 @@ fallback to a default route otherwise.
     app.matcher ("GET", (req) => {
         var user = new User (req.query["id"]);
         return "admin" in user.roles;
-    }, (req, res) => {
+    }, (req, res, end) => {
         // ...
     });
 
-    app.route ("<any:path>", (req, res) => {
+    app.route ("<any:path>", (req, res, end) => {
         res.status = 404;
-        res.end ();
+        end ();
     });
 
 Combining custom matcher with existing matcher
@@ -224,6 +224,33 @@ the processing of a handler.
 
 .. code:: vala
 
-    app.get ("redirection", (req, res) => {
+    app.get ("redirection", (req, res, end) => {
         throw new Redirection.MOVED_TEMPORAIRLY ("http://example.com");
     });
+<<<<<<< HEAD
+=======
+
+Handlers execute in asynchronous context, which means that two handlers can
+execute concurrently, but not necessary in parallel (you have to enable
+threding for that). It is fine to block as long as you are processing the
+response.
+
+If you have to process work and you are done with the response, use the
+asynchronous stream operations to avoid blocking either the response or the
+work.
+
+.. code:: vala
+
+    app.get ("", (req, res, end) => {
+        // write now and block
+        res.body.write ("Hello world!".data);
+
+        res.body.write_async.begin ("Hello world!".data, (obj, r) => {
+            var written = res.write_async.end (r);
+            end ();
+        });
+
+        // keep processing while the response is begin written
+    });
+
+>>>>>>> 6a9b588... Updates code examples with the end continuation.

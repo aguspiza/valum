@@ -45,13 +45,13 @@ Redirections are enumerated in ``Redirection`` enumeration.
 
 .. code:: vala
 
-    app.get ("user/<id>/save", (req, res) => {
+    app.get ("user/<id>/save", (req, res, end) => {
         var user = User (req.params["id"]);
 
         if (user.save ())
             throw new Redirection.MOVED_TEMPORAIRLY ("/user/%u".printf (user.id));
 
-        res.end ();
+        end ();
     });
 
 Client (4xx) and server (5xx) error
@@ -62,7 +62,7 @@ predefined in ``ClientError`` and ``ServerError`` enumerations.
 
 .. code:: vala
 
-    app.get ("not-found", (req, res) => {
+    app.get ("not-found", (req, res, end) => {
         throw new ClientError.NOT_FOUND ("The requested URI was not found.");
     });
 
@@ -78,6 +78,6 @@ the :doc:`router` can handle them properly.
         next (); // will throw a 404
     });
 
-    app.get ("", (req, res) => {
+    app.get ("", (req, res, end) => {
         throw new ClientError.NOT_FOUND ("");
     });

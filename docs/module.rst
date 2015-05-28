@@ -14,8 +14,9 @@ Let's say you need an administration section:
     using Valum;
 
     public static Router.LoaderCallback admin_loader = (admin) {
-        admin.get ("", (req, res) => {
+        admin.get ("", (req, res, end) => {
             // ...
+            end ();
         });
     }
 
@@ -49,8 +50,9 @@ Distributed code should be namespaced to avoid conflicts:
 
     namespace Admin {
         public static void admin_loader (Router admin) {
-            admin.get ("", (req, res) => {
+            admin.get ("", (req, res, end) => {
                 // ...
+                end ();
             });
         }
     }
