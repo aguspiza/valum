@@ -227,30 +227,3 @@ the processing of a handler.
     app.get ("redirection", (req, res, end) => {
         throw new Redirection.MOVED_TEMPORAIRLY ("http://example.com");
     });
-<<<<<<< HEAD
-=======
-
-Handlers execute in asynchronous context, which means that two handlers can
-execute concurrently, but not necessary in parallel (you have to enable
-threding for that). It is fine to block as long as you are processing the
-response.
-
-If you have to process work and you are done with the response, use the
-asynchronous stream operations to avoid blocking either the response or the
-work.
-
-.. code:: vala
-
-    app.get ("", (req, res, end) => {
-        // write now and block
-        res.body.write ("Hello world!".data);
-
-        res.body.write_async.begin ("Hello world!".data, (obj, r) => {
-            var written = res.write_async.end (r);
-            end ();
-        });
-
-        // keep processing while the response is begin written
-    });
-
->>>>>>> 6a9b588... Updates code examples with the end continuation.

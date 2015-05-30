@@ -14,8 +14,8 @@ a ``using`` statement, as they all respect a common interface.
 Two implementations exist at the moment and a few more are planned in a future
 minor release.
 
--  :doc:`server/soup`
--  :doc:`server/fastcgi`
+-  :doc:`vsgi/server/soup`
+-  :doc:`vsgi/server/fastcgi`
 
 .. code:: vala
 
@@ -76,9 +76,9 @@ can be parametrized easily.
 
     new Server (app).run ({"app", "--port", "3003"});
 
-There is also a :doc:`server/fastcgi` implementation for a live deployment,
-although you can still deploy with libsoup if you decide to use a modern
-hosting service like `Heroku`_.
+There is also a :doc:`vsgi/server/fastcgi` implementation for a live
+deployment, although you can still deploy with libsoup if you decide to use
+a modern hosting service like `Heroku`_.
 
 .. _Heroku: https://heroku.com
 

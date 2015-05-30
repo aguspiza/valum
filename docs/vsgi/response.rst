@@ -109,7 +109,7 @@ performances.
 
     app.get ("", (req, res) => {
         res.body.close_async (Priority.DEFAULT, null, () => {
-            res.end ();
+            end ();
         });
     });
 

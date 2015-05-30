@@ -18,25 +18,18 @@ development. If you think that this document could be improved,
 .. _valum-framework/valum: https://github.com/valum-framework/valum
 .. _open a ticket on GitHub: https://github.com/valum-framework/valum/issues
 
-Table Of Contents
------------------
-
 .. toctree::
+    :caption: Table of Contents
     :maxdepth: 2
 
     installation
     getting-started
     application
-    vsgi/request
-    vsgi/response
-    vsgi/server
-    vsgi/converters
+    vsgi/index
     redirection-and-error
     route
     router
     recipes/static-resource
-    server/soup
-    server/fastcgi
     module
     ctpl
     persistency
