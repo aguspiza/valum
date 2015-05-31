@@ -19,7 +19,6 @@ development. If you think that this document could be improved,
 .. _open a ticket on GitHub: https://github.com/valum-framework/valum/issues
 
 .. toctree::
-    :caption: Table of Contents
     :maxdepth: 2
 
     installation
@@ -29,7 +28,7 @@ development. If you think that this document could be improved,
     redirection-and-error
     route
     router
-    recipes/static-resource
+    recipes/index
     module
     ctpl
     persistency

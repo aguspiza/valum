@@ -108,17 +108,6 @@ performances.
 .. code:: vala
 
     app.get ("", (req, res) => {
-        res.body.close_async (Priority.DEFAULT, null, () => {
-            end ();
-        });
+        res.body.close_async (Priority.DEFAULT, null);
     });
-
-Ending the response
--------------------
-
-The ``Response`` defines the ``end`` signal used to notify that the response
-has been processed its resources can be freed.
-
-This signal must be emitted during the :doc:`application` handling, otherwise
-the response will hang and the client will never see it completed.
 

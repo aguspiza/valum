@@ -151,8 +151,6 @@ example show charset conversion using `GLib.CharsetConverter`_.
 
         // pipe the request body in the response body
         res.splice (req, OutputStreamSpliceFlags.CLOSE_SOURCE);
-
-        end ();
     });
 
 Multipart body

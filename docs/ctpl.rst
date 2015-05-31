@@ -88,10 +88,9 @@ application can produce very big output efficiently.
 
 .. code:: vala
 
-    app.get ("", (req, res, end) => {
+    app.get ("", (req, res) => {
         var template = new View.from_string ("");
         template.stream (res.body);
-        end ();
     });
 
 It is unfortunately not possible to stream with non-blocking I/O due to the
@@ -101,7 +100,7 @@ response body.
 
 .. code:: vala
 
-    app.get ("", (req, res, end) => {
+    app.get ("", (req, res) => {
         var template = new View.from_string ("");
         var buffer = new MemoryOutputStream.resizable ();
 
@@ -117,6 +116,5 @@ response body.
                                      null,
                                      (obj, result) => {
             var spliced = res.body.splice_async.end (result);
-            end ();
         });
     });

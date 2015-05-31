@@ -30,7 +30,7 @@ Lua
     var lua = new LuaVM ();
 
     // GET /lua
-    app.get ("lua", (req, res, end) => {
+    app.get ("lua", (req, res) => {
         var writer = new DataOutputStream (res.body);
 
         // evaluate a string containing Lua code
@@ -42,8 +42,6 @@ Lua
 
         // evaluate a file containing Lua code
         writer.put_string (lua.do_file ("scripts/hello.lua"));
-
-        end ();
     });
 
     new Soup (app).run ();
@@ -69,10 +67,9 @@ Scheme can be used to produce template or facilitate computation.
 
 .. code:: vala
 
-    app.get ("hello.scm", (req, res, end) => {
+    app.get ("hello.scm", (req, res) => {
         var writer = new DataOutputStream (res.body);
         writer.put_string (scm.run ("scripts/hello.scm"));
-        end ();
     });
 
 Scheme code:

@@ -13,7 +13,7 @@ Callback can be connected to HTTP methods via a list of helpers having the
 
 .. code:: vala
 
-    app.get ("rule", (req, res, end) => {});
+    app.get ("rule", (req, res) => {});
 
 The rule has to respect the rule syntax described in :doc:`route`. It will be
 compiled down to a regex which named groups are made accessible through
@@ -35,7 +35,7 @@ the ``application/x-www-form-urlencoded`` body of the :doc:`vsgi/request`.
 
 .. code:: vala
 
-    app.post ("login", (req, res, end) => {
+    app.post ("login", (req, res) => {
         var buffer = new MemoryOutputStream.resizable ();
 
         // consume the request body
@@ -48,8 +48,6 @@ the ``application/x-www-form-urlencoded`` body of the :doc:`vsgi/request`.
 
         // assuming you have a session implementation in your app
         var session = new Session.authenticated_by (username, password);
-
-        end ();
     });
 
 It is also possible to use a custom HTTP method via the ``method``
@@ -57,14 +55,14 @@ function.
 
 .. code:: vala
 
-    app.method ("METHOD", "rule", (req, res, end) => {});
+    app.method ("METHOD", "rule", (req, res) => {});
 
 :doc:`vsgi/request` provide an enumeration of HTTP methods for your
 convenience.
 
 .. code:: vala
 
-    app.method (Request.GET, "rule", (req, res, end) => {});
+    app.method (Request.GET, "rule", (req, res) => {});
 
 Multiple methods can be captured with ``methods`` and ``all``.
 
@@ -83,7 +81,7 @@ Regular expression
 
 .. code:: vala
 
-    app.regex (/home/, (req, res, end) => {
+    app.regex (/home/, (req, res) => {
         // matches /home
     });
 
@@ -96,7 +94,7 @@ otherwise you will experience inconsistencies.
 
 .. code:: vala
 
-    app.matcher (Request.GET, (req) => { return req.uri.get_path () == "/home"; }, (req, res, end) => {
+    app.matcher (Request.GET, (req) => { return req.uri.get_path () == "/home"; }, (req, res) => {
         // matches /home
     });
 
@@ -161,19 +159,19 @@ a future release.
 
     app.scope ("admin", (admin) => {
         // admin is a scoped Router
-        app.get ("users", (req, res, end) => {
+        app.get ("users", (req, res) => {
             // matches /admin/users
         });
     });
 
-    app.get ("users", (req, res, end) => {
+    app.get ("users", (req, res) => {
         // matches /users
     });
 
 Subrouting
 ----------
 
-Since ``VSGI.Application`` handler is type compatible with
+Since ``VSGI.ApplicationCallback`` is type compatible with
 ``Route.HandlerCallback``, it is possible to delegate request handling to
 another VSGI-compliant application.
 
@@ -214,8 +212,7 @@ matching route.
         next (); // keep routing
     });
 
-    app.get ("", (req, res, end) => {
+    app.get ("", (req, res) => {
         // this is invoked!
-        end ();
     });
 

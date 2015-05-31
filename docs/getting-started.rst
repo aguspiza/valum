@@ -30,12 +30,11 @@ changes in the framework.
 
     var app = new Router ();
 
-    app.get("", (req, res, end) => {
+    app.get("", (req, res) => {
         res.body.write ("Hello world!".data);
-        end ();
     });
 
-    new Server (app).run ({"app", "--port", "3003"});
+    new Server (app.handle).run ({"app", "--port", "3003"});
 
 Typically, the ``run`` function contains CLI argument to make runtime the
 parametrizable.

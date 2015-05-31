@@ -28,7 +28,7 @@ parameters with their named captures.
 
 .. code:: vala
 
-    app.get ("<int:i>", (req, res, end) => {
+    app.get ("<int:i>", (req, res) => {
         var i = req.params["i"];
     });
 
@@ -43,12 +43,12 @@ Rules are used by the HTTP methods alias and ``method`` function in
 .. code:: vala
 
     // using an alias
-    app.get ("your-rule/<int:id>", (req, res, end) => {
+    app.get ("your-rule/<int:id>", (req, res) => {
 
     });
 
     // using a method
-    app.method (Request.GET, "your-rule/<int:id>", (req, res, end) => {
+    app.method (Request.GET, "your-rule/<int:id>", (req, res) => {
 
     });
 
@@ -112,7 +112,7 @@ shows an example for creating a 404 error page.
 
 .. code:: vala
 
-    app.get("<any:path>", (req, res, end) => {
+    app.get("<any:path>", (req, res) => {
         res.status = 404;
     });
 
@@ -144,10 +144,9 @@ and optimized.
 
 .. code:: vala
 
-    app.regex (Request.GET, /home\/?/, (req, res, end) => {
+    app.regex (Request.GET, /home\/?/, (req, res) => {
         var writer = new DataOutputStream (res.body);
         writer.put_string ("Matched using a regular expression.");
-        end ();
     });
 
 Matching using a callback
@@ -163,10 +162,9 @@ A matcher consist of a callback matching a given ``Request`` object.
 
     Route.MatcherCallback matcher = (req) => { req.path == "/custom-matcher"; };
 
-    app.matcher ("GET", matcher, (req, res, end) => {
+    app.matcher ("GET", matcher, (req, res) => {
         var writer = new DataOutputStream (res.body);
         writer.put_string ("Matched using a custom matcher.");
-        end ();
     });
 
 You could, for instance, match the request if the user is an administrator and
@@ -177,13 +175,12 @@ fallback to a default route otherwise.
     app.matcher ("GET", (req) => {
         var user = new User (req.query["id"]);
         return "admin" in user.roles;
-    }, (req, res, end) => {
+    }, (req, res) => {
         // ...
     });
 
-    app.route ("<any:path>", (req, res, end) => {
+    app.route ("<any:path>", (req, res) => {
         res.status = 404;
-        end ();
     });
 
 Combining custom matcher with existing matcher
@@ -224,6 +221,6 @@ the processing of a handler.
 
 .. code:: vala
 
-    app.get ("redirection", (req, res, end) => {
+    app.get ("redirection", (req, res) => {
         throw new Redirection.MOVED_TEMPORAIRLY ("http://example.com");
     });

@@ -31,9 +31,6 @@ The following table describe how the router deal with specific error messages.
 | ClientError.METHOD_NOT_ALLOWED | Accept   |
 +--------------------------------+----------+
 
-Also, the :doc:`vsgi/response` will be automatically ended, so you do not have
-to trickily end it yourself.
-
 Redirection (3xx)
 -----------------
 
@@ -45,13 +42,11 @@ Redirections are enumerated in ``Redirection`` enumeration.
 
 .. code:: vala
 
-    app.get ("user/<id>/save", (req, res, end) => {
+    app.get ("user/<id>/save", (req, res) => {
         var user = User (req.params["id"]);
 
         if (user.save ())
             throw new Redirection.MOVED_TEMPORAIRLY ("/user/%u".printf (user.id));
-
-        end ();
     });
 
 Client (4xx) and server (5xx) error
@@ -62,7 +57,7 @@ predefined in ``ClientError`` and ``ServerError`` enumerations.
 
 .. code:: vala
 
-    app.get ("not-found", (req, res, end) => {
+    app.get ("not-found", (req, res) => {
         throw new ClientError.NOT_FOUND ("The requested URI was not found.");
     });
 
@@ -78,6 +73,6 @@ the :doc:`router` can handle them properly.
         next (); // will throw a 404
     });
 
-    app.get ("", (req, res, end) => {
+    app.get ("", (req, res) => {
         throw new ClientError.NOT_FOUND ("");
     });
