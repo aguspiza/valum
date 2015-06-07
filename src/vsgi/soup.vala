@@ -157,7 +157,7 @@ namespace VSGI.Soup {
 
 				this.application.handle (req, res);
 
-				message ("%s: %u %s %s", this.get_application_id (), res.status, req.method, req.uri.get_path ());
+				debug ("%s: %u %s %s", this.get_application_id (), res.status, req.method, req.uri.get_path ());
 
 				this.release ();
 			});
@@ -166,11 +166,11 @@ namespace VSGI.Soup {
 			this.server.listen_all (port, 0);
 
 			foreach (var uri in this.server.get_uris ()) {
-				message ("listening on %s://%s:%u", uri.scheme, uri.host, uri.port);
+				debug ("listening on %s://%s:%u", uri.scheme, uri.host, uri.port);
 			}
 #else
 			this.server.run_async ();
-			message ("listening on http://0.0.0.0:%u", this.server.port);
+			debug ("listening on http://0.0.0.0:%u", this.server.port);
 #endif
 
 			// keep alive if timeout is 0

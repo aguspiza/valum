@@ -271,7 +271,7 @@ namespace VSGI.FastCGI {
 				if (!this.socket.is_connected ())
 					error ("could not open socket path %s".printf (socket_path));
 
-				message ("listening on %s (backlog %d)", socket_path, backlog);
+				debug ("listening on %s (backlog %d)", socket_path, backlog);
 			}
 
 			else if (options.contains ("port")) {
@@ -281,14 +281,14 @@ namespace VSGI.FastCGI {
 				if (!this.socket.is_connected ())
 					error ("could not open TCP socket at port %s".printf (port));
 
-				message ("listening on tcp://0.0.0.0:%s (backlog %d)", port, backlog);
+				debug ("listening on tcp://0.0.0.0:%s (backlog %d)", port, backlog);
 			}
 
 			else
 #endif
 			{
 				this.socket = new GLib.Socket.from_fd (0);
-				message ("listening the default socket");
+				debug ("listening the default socket");
 			}
 
 			this.hold ();
@@ -318,7 +318,7 @@ namespace VSGI.FastCGI {
 
 				this.application.handle (req, res);
 
-				message ("%s: %u %s %s", this.get_application_id (), res.status, req.method, req.uri.get_path ());
+				debug ("%s: %u %s %s", this.get_application_id (), res.status, req.method, req.uri.get_path ());
 
 				request.finish ();
 				request.close (false); // keep the socket open
